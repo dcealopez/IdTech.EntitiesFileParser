@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdTech.EntitiesFileParser", "EntityFileParser\IdTech.EntitiesFileParser.csproj", "{4E6A371B-6B63-4366-8723-5FD686C9D124}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdTech.EntitiesFileParser", "IdTech.EntitiesFileParser\IdTech.EntitiesFileParser.csproj", "{4E6A371B-6B63-4366-8723-5FD686C9D124}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
