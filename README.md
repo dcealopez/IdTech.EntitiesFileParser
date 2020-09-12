@@ -149,7 +149,7 @@ foreach (var entity in entitiesFileParseResult.EntitiesFile.Entities)
 }
 ```
 
-As you might have noticed in the above, each **EntityProperty** of the **EntityDef** of each **Entity** has a "Value" object that you will need to cast to the corresponding **EntityPropertyValue** type subclass in order to manipulate the value itself.
+As you might have noticed in the code above, each **EntityProperty** of the **EntityDef** of each **Entity** has a "Value" object that you will need to cast to the corresponding **EntityPropertyValue** type subclass in order to manipulate the value itself.
 
 Here is a list of all the **EntityPropertyValue** subclasses with all the types that can be contained:
 
