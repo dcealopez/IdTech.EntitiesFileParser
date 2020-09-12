@@ -834,7 +834,7 @@ namespace IdTech.EntitiesFileParser
                     if (!IsValidPropertyName(propertyParts[0].Trim()))
                     {
                         Errors.Add(string.Format("Line {0}: invalid property name '{1}'", currentLineNumber, propertyParts[0].Trim()));
-                        continue;
+                        return null;
                     }
 
                     entityProperty.Name = propertyParts[0].Trim();
@@ -893,30 +893,27 @@ namespace IdTech.EntitiesFileParser
                 };
             }
 
-            // Check for double values
-            if (valueText.Contains("."))
-            {
-                double doubleValue = 0;
-
-                if (!Double.TryParse(valueText, NumberStyles.Any, CultureInfo.InvariantCulture, out doubleValue))
-                {
-                    Errors.Add(string.Format("Line {0}: invalid property value: {1}", currentLineNumber, valueText));
-                    return null;
-                }
-
-                return new EntityPropertyDoubleValue()
-                {
-                    Value = doubleValue
-                };
-            }
-
-            // Only possible type now is a long integer
+            // Check for long values
             long intValue = 0;
 
             if (!long.TryParse(valueText, out intValue))
             {
-                Errors.Add(string.Format("Line {0}: invalid property value: {1}", currentLineNumber, valueText));
-                return null;
+                // If we can't parse it as a long, try as a double
+                if (valueText.Contains("."))
+                {
+                    double doubleValue = 0;
+
+                    if (!Double.TryParse(valueText, NumberStyles.Any, CultureInfo.InvariantCulture, out doubleValue))
+                    {
+                        Errors.Add(string.Format("Line {0}: invalid property value: {1}", currentLineNumber, valueText));
+                        return null;
+                    }
+
+                    return new EntityPropertyDoubleValue()
+                    {
+                        Value = doubleValue
+                    };
+                }
             }
 
             return new EntityPropertyLongValue()

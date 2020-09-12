@@ -174,7 +174,7 @@ namespace IdTech.EntitiesFileParser
         /// <param name="objectProperty">EntityProperty of the object</param>
         /// <param name="indentationLevel">current indentation level</param>
         /// <returns>the string for the object</returns>
-        public static string GetObjectString(EntityProperty objectProperty, ref uint indentationLevel)
+        internal static string GetObjectString(EntityProperty objectProperty, ref uint indentationLevel)
         {
             StringBuilder objectString = new StringBuilder();
             objectString.Append(IndentText(objectProperty.Name, indentationLevel)).Append(" = ");
@@ -221,7 +221,7 @@ namespace IdTech.EntitiesFileParser
         /// <param name="arrayItemIndex">index of this item in the array</param>
         /// <param name="indentationLevel">current indentation level</param>
         /// <returns>the string for the array object value></returns>
-        public static string GetArrayObjectValueString(EntityPropertyObjectValue arrayObjectValue, int arrayItemIndex, uint indentationLevel)
+        internal static string GetArrayObjectValueString(EntityPropertyObjectValue arrayObjectValue, int arrayItemIndex, uint indentationLevel)
         {
             StringBuilder objectString = new StringBuilder();
             objectString.Append(IndentText("item[", indentationLevel)).Append(arrayItemIndex).Append("] = {").Append("\n");
@@ -260,7 +260,7 @@ namespace IdTech.EntitiesFileParser
         /// <param name="property">EntityProperty of the "single-line" property</param>
         /// <param name="indentationLevel">current indentation level</param>
         /// <returns>the string for the "single-line" property</returns>
-        public static string GetPropertyString(EntityProperty property, uint indentationLevel)
+        internal static string GetPropertyString(EntityProperty property, uint indentationLevel)
         {
             StringBuilder propertyString = new StringBuilder();
             propertyString.Append(IndentText(property.Name, indentationLevel)).Append(" = ");
@@ -279,7 +279,7 @@ namespace IdTech.EntitiesFileParser
             }
             else if (property.Value.GetType() == typeof(EntityPropertyDoubleValue))
             {
-                propertyString.Append(((EntityPropertyDoubleValue)property.Value).Value.ToString(CultureInfo.InvariantCulture).ToLower()).Append(";");
+                propertyString.Append(((EntityPropertyDoubleValue)property.Value).Value.ToString("R", CultureInfo.InvariantCulture).ToLower()).Append(";");
             }
             else
             {
@@ -296,7 +296,7 @@ namespace IdTech.EntitiesFileParser
         /// <param name="arrayItemIndex">index of this item in the array</param>
         /// <param name="indentationLevel">current indentation level</param>
         /// <returns>the string for the array "single-line" property value</returns>
-        public static string GetArrayPropertyValueString(EntityPropertyValue arrayValue, int arrayItemIndex, uint indentationLevel)
+        internal static string GetArrayPropertyValueString(EntityPropertyValue arrayValue, int arrayItemIndex, uint indentationLevel)
         {
             StringBuilder arrayPropertyValueString = new StringBuilder();
             arrayPropertyValueString.Append(IndentText("item[", indentationLevel)).Append(arrayItemIndex).Append("] = ");
@@ -311,7 +311,7 @@ namespace IdTech.EntitiesFileParser
             }
             else if (arrayValue.GetType() == typeof(EntityPropertyDoubleValue))
             {
-                arrayPropertyValueString.Append(((EntityPropertyDoubleValue)arrayValue).Value.ToString(CultureInfo.InvariantCulture).ToLower()).Append(";");
+                arrayPropertyValueString.Append(((EntityPropertyDoubleValue)arrayValue).Value.ToString("R", CultureInfo.InvariantCulture).ToLower()).Append(";");
             }
             else
             {
@@ -327,7 +327,7 @@ namespace IdTech.EntitiesFileParser
         /// <param name="text">text to indent</param>
         /// <param name="indentationLevel">tabs to add</param>
         /// <returns>the indented text</returns>
-        public static string IndentText(string text, uint indentationLevel)
+        internal static string IndentText(string text, uint indentationLevel)
         {
             if (indentationLevel == 0)
             {
