@@ -91,22 +91,9 @@ namespace IdTech.EntitiesFileParser
                             }
 
                             // Look for the properties section
-                            if (openingBracketCount == 0 && entitiesFile.Properties == null)
+                            if (openingBracketCount == 0 && entitiesFile.Properties == null &&
+                                (line.Equals("properties {") || line.Equals("properties{")))
                             {
-                                if (!line.Equals("properties {") && !line.Equals("properties{"))
-                                {
-                                    if (line.Equals("properties"))
-                                    {
-                                        Errors.Add(string.Format("Line {0}: missing '{{'", currentLineNumber));
-                                    }
-                                    else
-                                    {
-                                        Errors.Add(string.Format("Line {0}: unexpected '{1}", currentLineNumber, line));
-                                    }
-
-                                    continue;
-                                }
-
                                 // Parse the properties
                                 entitiesFile.Properties = new List<EntityProperty>();
 
