@@ -61,6 +61,9 @@ namespace IdTech.EntitiesFileParser
                         // Get whole entity blocks to pass them to the entity parser
                         while ((line = sr.ReadLine()) != null)
                         {
+                            // Remove comments from lines
+                            line = RemoveComments(line, "//");
+
                             currentLineNumber++;
                             line = line.Trim();
 
@@ -85,6 +88,52 @@ namespace IdTech.EntitiesFileParser
                                     entitiesFile.HierarchyVersion = versionHeaderPart[1];
                                     continue;
                                 }
+                            }
+
+                            // Look for the properties section
+                            if (openingBracketCount == 0 && entitiesFile.Properties == null)
+                            {
+                                if (!line.Equals("properties {") && !line.Equals("properties{"))
+                                {
+                                    if (line.Equals("properties"))
+                                    {
+                                        Errors.Add(string.Format("Line {0}: missing '{{'", currentLineNumber));
+                                    }
+                                    else
+                                    {
+                                        Errors.Add(string.Format("Line {0}: unexpected '{1}", currentLineNumber, line));
+                                    }
+
+                                    continue;
+                                }
+
+                                // Parse the properties
+                                entitiesFile.Properties = new List<EntityProperty>();
+
+                                while ((line = sr.ReadLine()) != null && !line.Trim().Equals("}"))
+                                {
+                                    try
+                                    {
+                                        currentLineNumber++;
+                                        entitiesFile.Properties.Add(ParseEntityProperty(line, ref currentLineNumber, true));
+                                    }
+                                    catch (FormatException)
+                                    {
+                                        throw;
+                                    }
+                                }
+
+                                // Closing bracket
+                                currentLineNumber++;
+
+                                // Read the next line after the closing bracket
+                                if ((line = sr.ReadLine()) == null)
+                                {
+                                    break;
+                                }
+
+                                // Next line
+                                currentLineNumber++;
                             }
 
                             // Look for entities
@@ -561,8 +610,9 @@ namespace IdTech.EntitiesFileParser
         /// </summary>
         /// <param name="propertyText">text containing the property</param>
         /// <param name="currentLineNumber">current line number reference in the file</param>
+        /// <param name="isFromPropertiesSection">indicates wether or not this property comes from the properties section</param>
         /// <returns>an EntityProperty object containing the parsed data from the property</returns>
-        internal EntityProperty ParseEntityProperty(string propertyText, ref int currentLineNumber)
+        internal EntityProperty ParseEntityProperty(string propertyText, ref int currentLineNumber, bool isFromPropertiesSection = false)
         {
             // Split the property definition into lines (if it has any)
             EntityProperty entityProperty = new EntityProperty();
@@ -602,6 +652,14 @@ namespace IdTech.EntitiesFileParser
                     propertyParts[0] = propertyParts[0].Trim();
                     propertyParts[1] = propertyParts[1].Trim();
 
+                    // Check if the property name is quoted
+                    if (propertyParts[0].StartsWith("\"") && propertyParts[0].EndsWith("\""))
+                    {
+                        entityProperty.IsQuoted = true;
+                        propertyParts[0] = propertyParts[0].Remove(0, 1);
+                        propertyParts[0] = propertyParts[0].Remove(propertyParts[0].Length - 1, 1);
+                    }
+
                     if(!IsValidPropertyName(propertyParts[0]))
                     {
                         Errors.Add(string.Format("Line {0}: invalid property name '{1}'", currentLineNumber, propertyParts[0]));
@@ -613,11 +671,11 @@ namespace IdTech.EntitiesFileParser
                     try
                     {
                         // Check for and remove semicolon at the end for the value parser
-                        if (propertyParts[1][propertyParts[1].Length - 1] != ';')
+                        if (propertyParts[1][propertyParts[1].Length - 1] != ';' && !isFromPropertiesSection)
                         {
                             Errors.Add(string.Format("Line {0}: missing ';'", currentLineNumber));
                         }
-                        else
+                        else if (!isFromPropertiesSection)
                         {
                             propertyParts[1] = propertyParts[1].Remove(propertyParts[1].Length - 1, 1);
                         }
@@ -831,6 +889,14 @@ namespace IdTech.EntitiesFileParser
                         entityProperty.Value = arrayValue;
                     }
 
+                    // Check if the property name is quoted
+                    if (propertyParts[0].StartsWith("\"") && propertyParts[0].EndsWith("\""))
+                    {
+                        entityProperty.IsQuoted = true;
+                        propertyParts[0] = propertyParts[0].Remove(0, 1);
+                        propertyParts[0] = propertyParts[0].Remove(propertyParts[0].Length - 1, 1);
+                    }
+
                     if (!IsValidPropertyName(propertyParts[0].Trim()))
                     {
                         Errors.Add(string.Format("Line {0}: invalid property name '{1}'", currentLineNumber, propertyParts[0].Trim()));
@@ -940,6 +1006,23 @@ namespace IdTech.EntitiesFileParser
         internal static bool IsValidEntityDefName(string text)
         {
             return Regex.IsMatch(text, @"^[a-zA-Z0-9_/]+$");
+        }
+
+        /// <summary>
+        /// Removes comments from the specified text
+        /// </summary>
+        /// <param name="text">text to remove comments from</param>
+        /// <returns>the text with comments removed</returns>
+        internal static string RemoveComments(string text, string commentsDelimiter)
+        {
+            int commentStartPos = text.IndexOf(commentsDelimiter);
+
+            if (commentStartPos == -1)
+            {
+                return text;
+            }
+
+            return text.Remove(commentStartPos);
         }
     }
 }

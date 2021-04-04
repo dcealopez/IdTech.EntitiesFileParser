@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -20,6 +21,11 @@ namespace IdTech.EntitiesFileParser
             {
                 streamWriter.NewLine = "";
                 streamWriter.WriteLine(GetEntitiesFileHeaderString(entitiesFile));
+
+                if (entitiesFile.Properties != null && entitiesFile.Properties.Count != 0)
+                {
+                    streamWriter.WriteLine(GetPropertiesSectionString(entitiesFile.Properties));
+                }
 
                 for (int i = 0; i < entitiesFile.Entities.Count; i++)
                 {
@@ -55,6 +61,33 @@ namespace IdTech.EntitiesFileParser
             }
 
             return header.ToString();
+        }
+
+        /// <summary>
+        /// Builds the full string for the properties section of the entities file
+        /// </summary>
+        /// <param name="properties">list of the properties in the properties section</param>
+        /// <returns>the full string for the properties section</returns>
+        internal static string GetPropertiesSectionString(List<EntityProperty> properties)
+        {
+            if (properties == null || properties.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder propertiesSectionString = new StringBuilder();
+            uint indentationLevel = 1;
+
+            propertiesSectionString.Append("properties {").Append("\n");
+
+            foreach (var property in properties)
+            {
+                propertiesSectionString.Append(GetPropertyString(property, indentationLevel, true)).Append("\n");
+            }
+
+            propertiesSectionString.Append("}").Append("\n");
+
+            return propertiesSectionString.ToString();
         }
 
         /// <summary>
@@ -259,31 +292,65 @@ namespace IdTech.EntitiesFileParser
         /// </summary>
         /// <param name="property">EntityProperty of the "single-line" property</param>
         /// <param name="indentationLevel">current indentation level</param>
+        /// <param name="isFromPropertiesSection">indicates wether or not the property comes from the properties section</param>
         /// <returns>the string for the "single-line" property</returns>
-        internal static string GetPropertyString(EntityProperty property, uint indentationLevel)
+        internal static string GetPropertyString(EntityProperty property, uint indentationLevel, bool isFromPropertiesSection = false)
         {
             StringBuilder propertyString = new StringBuilder();
-            propertyString.Append(IndentText(property.Name, indentationLevel)).Append(" = ");
+            string propertyName = property.Name;
+
+            if (property.IsQuoted)
+            {
+                propertyName = propertyName.Insert(0, "\"");
+                propertyName = propertyName.Insert(propertyName.Length, "\"");
+            }
+
+            propertyString.Append(IndentText(propertyName, indentationLevel)).Append(" = ");
 
             if (property.Value.GetType() == typeof(EntityPropertyNullValue))
             {
-                propertyString.Append("NULL;");
+                propertyString.Append("NULL");
+
+                if (!isFromPropertiesSection)
+                {
+                    propertyString.Append(";");
+                }
             }
             else if (property.Value.GetType() == typeof(EntityPropertyStringValue))
             {
-                propertyString.Append("\"").Append(((EntityPropertyStringValue)property.Value).Value).Append("\";");
+                propertyString.Append("\"").Append(((EntityPropertyStringValue)property.Value).Value).Append("\"");
+
+                if (!isFromPropertiesSection)
+                {
+                    propertyString.Append(";");
+                }
             }
             else if (property.Value.GetType() == typeof(EntityPropertyBooleanValue))
             {
-                propertyString.Append(((EntityPropertyBooleanValue)property.Value).Value.ToString().ToLower()).Append(";");
+                propertyString.Append(((EntityPropertyBooleanValue)property.Value).Value.ToString().ToLower());
+
+                if (!isFromPropertiesSection)
+                {
+                    propertyString.Append(";");
+                }
             }
             else if (property.Value.GetType() == typeof(EntityPropertyDoubleValue))
             {
-                propertyString.Append(((EntityPropertyDoubleValue)property.Value).Value.ToString("R", CultureInfo.InvariantCulture).ToLower()).Append(";");
+                propertyString.Append(((EntityPropertyDoubleValue)property.Value).Value.ToString("R", CultureInfo.InvariantCulture).ToLower());
+
+                if (!isFromPropertiesSection)
+                {
+                    propertyString.Append(";");
+                }
             }
             else
             {
-                propertyString.Append(((EntityPropertyLongValue)property.Value).Value.ToString(CultureInfo.InvariantCulture).ToLower()).Append(";");
+                propertyString.Append(((EntityPropertyLongValue)property.Value).Value.ToString(CultureInfo.InvariantCulture).ToLower());
+
+                if (!isFromPropertiesSection)
+                {
+                    propertyString.Append(";");
+                }
             }
 
             return propertyString.ToString();

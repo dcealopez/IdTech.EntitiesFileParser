@@ -11,6 +11,11 @@
         public string Name;
 
         /// <summary>
+        /// Indicates wether or not the name of the property is quoted
+        /// </summary>
+        public bool IsQuoted;
+
+        /// <summary>
         /// The value of the property
         /// </summary>
         public EntityPropertyValue Value;

@@ -18,6 +18,11 @@ namespace IdTech.EntitiesFileParser
         public string HierarchyVersion;
 
         /// <summary>
+        /// Entities file properties section
+        /// </summary>
+        public List<EntityProperty> Properties;
+
+        /// <summary>
         /// Entities file entities
         /// </summary>
         public List<Entity> Entities;
