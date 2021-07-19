@@ -905,11 +905,6 @@ namespace IdTech.EntitiesFileParser
         /// <returns>an EntityPropertyValue containing the data from the parsed value</returns>
         internal EntityPropertyValue ParseEntityPropertyValue(string valueText, ref int currentLineNumber)
         {
-            if (valueText.Contains("e+10"))
-            {
-                Console.WriteLine("a");
-            }
-
             if (string.IsNullOrEmpty(valueText.Trim()))
             {
                 Errors.Add(string.Format("Line {0}: missing property value", currentLineNumber));
@@ -954,10 +949,10 @@ namespace IdTech.EntitiesFileParser
             // Check for long values
             long intValue = 0;
 
-            if (!long.TryParse(valueText, NumberStyles.AllowExponent, CultureInfo.InvariantCulture, out intValue))
+            if (!long.TryParse(valueText, out intValue))
             {
                 // If we can't parse it as a long, try as a double
-                if (valueText.Contains("."))
+                if (valueText.Contains(".") || valueText.Contains("e") || valueText.Contains("E"))
                 {
                     double doubleValue = 0;
 
